@@ -8,7 +8,6 @@ set -e
 # CONFIGURATION
 # ============================================================================
 
-DEFAULT_PR_NUMBER="5497"
 DEFAULT_REPO_DIR="$HOME/git/opencode"
 DEFAULT_INSTALL_PATH="$HOME/.opencode/bin/opencode"
 DEFAULT_LOG_FILE="$HOME/.opencode-pr-builder.log"
@@ -122,7 +121,7 @@ check_dependencies() {
 
 parse_arguments() {
     # Set defaults
-    PR_NUMBER="$DEFAULT_PR_NUMBER"
+    PR_NUMBER=""
     REPO_DIR="$DEFAULT_REPO_DIR"
     INSTALL_PATH="$DEFAULT_INSTALL_PATH"
     LOG_FILE="$DEFAULT_LOG_FILE"
@@ -187,6 +186,18 @@ parse_arguments() {
 
     # Default command
     COMMAND="${COMMAND:-update}"
+
+    # Validate PR number
+    if [ -z "$PR_NUMBER" ] && [[ "$COMMAND" =~ ^(update|check|check-conflicts)$ ]]; then
+        print_error "PR number is required"
+        echo ""
+        echo "Usage: $0 --pr <number> [command] [options]"
+        echo ""
+        echo "Example:"
+        echo "  $0 --pr 5497"
+        echo "  $0 --pr 5501 check-conflicts"
+        exit 1
+    fi
 }
 
 # ============================================================================
@@ -678,7 +689,7 @@ Commands:
   help             Show this help message
 
 Options:
-  --pr <number>          PR number to merge (default: 5497)
+  --pr <number>          PR number to merge (required)
   --branch <name>        PR branch name (fallback if API fails)
   --owner <username>     PR owner (fallback if API fails)
   --repo-dir <path>      OpenCode repo path (default: ~/git/opencode)
@@ -690,11 +701,11 @@ Options:
   --clone-only           Only clone repository, don't patch/build/install
 
 Examples:
-  $0                                    # Default PR #5497
-  $0 --pr 5501                          # Different PR
-  $0 check-conflicts --pr 5501          # Check conflicts
+  $0 --pr 5497                                    # Build with PR #5497
+  $0 --pr 5501                                    # Build with PR #5501
+  $0 check-conflicts --pr 5501                    # Check conflicts for PR #5501
   $0 --pr 5501 --branch feat-x --owner user --overwrite
-  $0 --pr 5501 --clone-only             # Only clone repo, no patches/build
+  $0 --pr 5501 --clone-only                       # Only clone repo, no patches/build
   $0 --pr 5501 --install-path ~/bin/opencode
 
 For more information, visit: https://github.com/kajeagentspi/opencode-pr-builder

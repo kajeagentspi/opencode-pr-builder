@@ -35,13 +35,13 @@ cd opencode-pr-builder
 chmod +x *.sh
 
 # Check if PR conflicts before building
-./update-opencode-custom.sh check-conflicts --pr 5501
+./update-opencode-custom.sh check-conflicts --pr 5497
 
-# Build custom OpenCode with PR #5501
+# Build custom OpenCode with PR #5497
+./update-opencode-custom.sh --pr 5497
+
+# Build with different PR
 ./update-opencode-custom.sh --pr 5501
-
-# Default PR #5497 (tokens-per-second display)
-./update-opencode-custom.sh
 ```
 
 ## Commands
@@ -59,7 +59,7 @@ chmod +x *.sh
 
 | Option | Description |
 |--------|-------------|
-| `--pr <number>` | PR number to build (default: 5497) |
+| `--pr <number>` | PR number to build (required) |
 | `--branch <name>` | PR branch name (fallback if API fails) |
 | `--owner <username>` | PR owner (fallback if API fails) |
 | `--repo-dir <path>` | OpenCode repo path (default: ~/git/opencode) |
@@ -73,7 +73,7 @@ chmod +x *.sh
 
 ```bash
 # Check conflicts before building
-./update-opencode-custom.sh check-conflicts --pr 5501
+./update-opencode-custom.sh check-conflicts --pr 5497
 
 # Build with specific PR (auto-detects branch/owner)
 ./update-opencode-custom.sh --pr 5501
@@ -86,6 +86,9 @@ chmod +x *.sh
 
 # Build without patches
 ./update-opencode-custom.sh --pr 5501 --skip-patches
+
+# Only clone repository
+./update-opencode-custom.sh --pr 5501 --clone-only
 
 # Use GitHub token (for higher API rate limit)
 ./update-opencode-custom.sh --pr 5501 --token ghp_xxxxxxxxxxxx
