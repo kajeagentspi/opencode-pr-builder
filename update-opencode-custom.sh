@@ -24,6 +24,7 @@ GITHUB_TOKEN=""
 SKIP_PATCHES=false
 BACKUP_BINARY=true
 OVERWRITE=false
+CLONE_ONLY=false
 COMMAND=""
 MANUAL_BRANCH=""
 MANUAL_OWNER=""
@@ -165,6 +166,10 @@ parse_arguments() {
                 ;;
             --overwrite)
                 OVERWRITE=true
+                shift
+                ;;
+            --clone-only)
+                CLONE_ONLY=true
                 shift
                 ;;
             update|patch|build|install|check|check-conflicts|help)
@@ -618,6 +623,20 @@ update() {
     # Step 2: Manage repository
     manage_repo
 
+    # If clone-only mode, stop here
+    if [ "$CLONE_ONLY" = true ]; then
+        print_success "Repository cloned successfully (--clone-only mode)"
+        echo ""
+        echo "Repository location: $REPO_DIR"
+        echo ""
+        echo "To continue manually:"
+        echo "  cd $REPO_DIR"
+        echo "  bun install"
+        echo "  cd packages/opencode"
+        echo "  bun run build"
+        return 0
+    fi
+
     # Step 3: Apply patches
     apply_patches
 
@@ -668,12 +687,14 @@ Options:
   --skip-patches         Skip applying patches
   --no-backup            Don't backup existing binary
   --overwrite            Delete existing repo without prompting
+  --clone-only           Only clone repository, don't patch/build/install
 
 Examples:
   $0                                    # Default PR #5497
   $0 --pr 5501                          # Different PR
   $0 check-conflicts --pr 5501          # Check conflicts
   $0 --pr 5501 --branch feat-x --owner user --overwrite
+  $0 --pr 5501 --clone-only             # Only clone repo, no patches/build
   $0 --pr 5501 --install-path ~/bin/opencode
 
 For more information, visit: https://github.com/kajeagentspi/opencode-pr-builder
