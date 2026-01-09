@@ -591,7 +591,8 @@ install_binary() {
     print_warning "Installing custom binary..."
     mkdir -p "$(dirname "$target_binary")"
 
-    if cp "$source_binary" "$target_binary"; then
+    # Use mv to avoid "text file busy" error when binary is in use
+    if mv "$source_binary" "$target_binary"; then
         chmod +x "$target_binary"
         print_success "Binary installed successfully"
         print_success "Location: $target_binary"
