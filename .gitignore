@@ -1,0 +1,16 @@
+# Log files
+*.log
+.opencode-pr-builder.log
+
+# Backup files
+*.backup
+*.bak
+
+# Build artifacts (if running tests in-repo)
+dist/
+node_modules/
+.turbo/
+
+# OS files
+.DS_Store
+Thumbs.db
