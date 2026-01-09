@@ -187,15 +187,17 @@ parse_arguments() {
     # Default command
     COMMAND="${COMMAND:-update}"
 
-    # Validate PR number
-    if [ -z "$PR_NUMBER" ] && [[ "$COMMAND" =~ ^(update|check|check-conflicts)$ ]]; then
-        print_error "PR number is required"
+    # Validate PR number (not required for clone-only mode)
+    if [ -z "$PR_NUMBER" ] && [ "$CLONE_ONLY" = false ] && [[ "$COMMAND" =~ ^(update|check|check-conflicts)$ ]]; then
+        print_error "PR number is required (unless using --clone-only)"
         echo ""
         echo "Usage: $0 --pr <number> [command] [options]"
+        echo "   or: $0 --clone-only [options]"
         echo ""
-        echo "Example:"
+        echo "Examples:"
         echo "  $0 --pr 5497"
         echo "  $0 --pr 5501 check-conflicts"
+        echo "  $0 --clone-only"
         exit 1
     fi
 }
@@ -625,6 +627,26 @@ install_binary() {
 # ============================================================================
 
 update() {
+    if [ "$CLONE_ONLY" = true ]; then
+        print_header "OpenCode PR Builder (Clone-Only Mode)"
+        log "Starting clone-only operation"
+
+        # Skip PR status check, just clone the repo
+        manage_repo
+
+        print_success "Repository cloned successfully (--clone-only mode)"
+        echo ""
+        echo "Repository location: $REPO_DIR"
+        echo ""
+        echo "To continue manually:"
+        echo "  cd $REPO_DIR"
+        echo "  git checkout dev"
+        echo "  bun install"
+        echo "  cd packages/opencode"
+        echo "  bun run build"
+        return 0
+    fi
+
     print_header "OpenCode PR Builder"
     log "Starting update for PR #$PR_NUMBER"
 
@@ -633,20 +655,6 @@ update() {
 
     # Step 2: Manage repository
     manage_repo
-
-    # If clone-only mode, stop here
-    if [ "$CLONE_ONLY" = true ]; then
-        print_success "Repository cloned successfully (--clone-only mode)"
-        echo ""
-        echo "Repository location: $REPO_DIR"
-        echo ""
-        echo "To continue manually:"
-        echo "  cd $REPO_DIR"
-        echo "  bun install"
-        echo "  cd packages/opencode"
-        echo "  bun run build"
-        return 0
-    fi
 
     # Step 3: Apply patches
     apply_patches
