@@ -628,22 +628,29 @@ install_binary() {
 
 update() {
     if [ "$CLONE_ONLY" = true ]; then
-        print_header "OpenCode PR Builder (Clone-Only Mode)"
-        log "Starting clone-only operation"
+        print_header "OpenCode PR Builder (Clean Build)"
+        log "Starting clean build without PR"
 
-        # Skip PR status check, just clone the repo
+        # Force fresh clone of base repo
+        OVERWRITE=true
         manage_repo
 
-        print_success "Repository cloned successfully (--clone-only mode)"
+        # Apply patches
+        apply_patches
+
+        # Build
+        build_custom
+
+        # Install
+        install_binary
+
+        print_header "Build Complete!"
+        print_success "Clean OpenCode build installed!"
         echo ""
-        echo "Repository location: $REPO_DIR"
+        echo "Version: $($INSTALL_PATH --version 2>/dev/null || echo 'Unknown')"
+        echo "Location: $INSTALL_PATH"
         echo ""
-        echo "To continue manually:"
-        echo "  cd $REPO_DIR"
-        echo "  git checkout dev"
-        echo "  bun install"
-        echo "  cd packages/opencode"
-        echo "  bun run build"
+        echo "Restart OpenCode to use the new version."
         return 0
     fi
 
@@ -697,7 +704,7 @@ Commands:
   help             Show this help message
 
 Options:
-  --pr <number>          PR number to merge (required)
+  --pr <number>          PR number to merge (required, unless --clone-only)
   --branch <name>        PR branch name (fallback if API fails)
   --owner <username>     PR owner (fallback if API fails)
   --repo-dir <path>      OpenCode repo path (default: ~/git/opencode)
@@ -706,14 +713,14 @@ Options:
   --skip-patches         Skip applying patches
   --no-backup            Don't backup existing binary
   --overwrite            Delete existing repo without prompting
-  --clone-only           Only clone repository, don't patch/build/install
+  --clone-only           Build clean version without PR (patches + build + install)
 
 Examples:
   $0 --pr 5497                                    # Build with PR #5497
   $0 --pr 5501                                    # Build with PR #5501
   $0 check-conflicts --pr 5501                    # Check conflicts for PR #5501
   $0 --pr 5501 --branch feat-x --owner user --overwrite
-  $0 --pr 5501 --clone-only                       # Only clone repo, no patches/build
+  $0 --clone-only                                 # Clean build without PR
   $0 --pr 5501 --install-path ~/bin/opencode
 
 For more information, visit: https://github.com/kajeagentspi/opencode-pr-builder
