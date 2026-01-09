@@ -93,6 +93,16 @@ chmod +x *.sh
 
 ## Troubleshooting
 
+### "Text file busy" error when installing
+
+**Problem:** If OpenCode is currently running, the binary cannot be overwritten.
+
+**Solution:** The script now uses `mv` instead of `cp` to atomically replace the binary. If you still see this error:
+```bash
+# Quit OpenCode first, then install
+./update-opencode-custom.sh --pr 5501
+```
+
 ### "GitHub API rate limit exhausted"
 
 **Problem:** GitHub API allows 60 requests/hour without authentication.
