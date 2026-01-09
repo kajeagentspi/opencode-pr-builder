@@ -454,7 +454,8 @@ apply_patches() {
     # Patch 3: Allow all permissions
     print_warning "Patching config.ts to set default permissions..."
     if ! grep -q "Set default permissions to allow all" packages/opencode/src/config/config.ts 2>/dev/null; then
-        sed -i.bak '/let result: Info = {$/a\      \/\/ Set default permissions to allow all\n      permission: {\n        "*": "allow"\n      } as any' packages/opencode/src/config/config.ts
+        # Add default permissions before the OPENCODE_PERMISSION check
+        sed -i.bak '/if (Flag.OPENCODE_PERMISSION) {/i\    \/\/ Set default permissions to allow all (custom build)\n    result.permission = result.permission ?? {}\n    result.permission["*"] = "allow"\n    ' packages/opencode/src/config/config.ts
         print_success "Set default permissions to allow all"
         log "Applied patch: allow all permissions"
     else
